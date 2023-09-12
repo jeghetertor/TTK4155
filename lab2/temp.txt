@@ -1,1 +1,3 @@
 
+https://mansfield-devine.com/speculatrix/2017/04/avr-basics-reading-and-writing-gpio-pins/
+https://mansfield-devine.com/speculatrix/2017/04/avr-basics-ports-and-direction-registers/
