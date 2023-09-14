@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "UART.h"
+#include "ADC.h"
 
 #define F_CPU 4915200UL
 #define FOSC 4915200UL
@@ -18,13 +19,7 @@ struct Sliders {
 	uint8_t left;
 	uint8_t right;
 	};
-struct ADC {
-	uint8_t l_slider;
-	uint8_t r_slider;
-	uint8_t x_axis;
-	uint8_t y_axis;
-	
-	};
+
 void SRAM_test(void)
 {
 	volatile char *ext_ram = (char *) 0x1800; // Start address for the SRAM
@@ -109,6 +104,7 @@ void ADC_PWM_clock_init(void){
 	//DDD5 = 1;
 	//sei();
 }
+/*
 struct ADC  ADC_read(void){
 	volatile char *adc_mem = (char *) 0x1400;
 	adc_mem[0] = 0x04;
@@ -124,7 +120,7 @@ struct ADC  ADC_read(void){
 	/*uint8_t x_axis = adc_mem[0];
 	uint8_t y_axis = adc_mem[1];
 	uint8_t l_slider = adc_mem[2];
-	uint8_t r_slider = adc_mem[3];*/
+	uint8_t r_slider = adc_mem[3];*
 	adc.x_axis = adc_mem[0];
 	adc.y_axis = adc_mem[1];
 	adc.l_slider = adc_mem[2];
@@ -134,7 +130,7 @@ struct ADC  ADC_read(void){
 	//printf("x- %03d y- %03d l_slider- %03d r_slider- %03d\n", x_axis, y_axis, l_slider, r_slider);
 	//printf("v_l %f v_r %f\n",max_voltage, max_dec);
 	
-} 
+} */
 struct JoyAngle read_joy_angle(void){
 	volatile char *adc_mem = (char *) 0x1400;
 	adc_mem[0] = 0x04;
@@ -164,15 +160,21 @@ int main(void){
 	
 	MCUCR |= (1 << 7); //Enabling XMEM
 	SFIOR = (1 << XMM2); //mask pc4-pc7
-	ADC_PWM_clock_init();
+	ADC_init();
 	UART_init(MYUBRR);
 	DDRB |= (0<<PB1) | (0<<PB2);
+	struct Offset_const offset_const = ADC_calibration();
 	while(1){
-		struct ADC adc = ADC_read();
+		struct ADC adc = ADC_output(offset_const);
+		uint8_t joy_dir = Joy_direction(offset_const);
+		
+		printf(" %02d ", joy_dir);
+		
+		//printf("Offset x: %02d   Offset y: %02d\n", offset_const.offset_x, offset_const.offset_y);
 		//struct JoyAngle joyAngle = read_joy_angle();
 		//struct Sliders slider = read_slider();
 		
-		printf("right:%3d left:%3d x:%3d y:%3d\n",adc.r_slider,adc.l_slider,adc.x_axis,adc.y_axis);
+		//printf("right:%3d left:%3d x:%3d y:%3d\n",adc.r_slider,adc.l_slider,adc.x_axis,adc.y_axis);
 		//bool pb1Val = PINB & (1 << PINB1);
 		//bool pb2Val = PINB & (1 << PINB2);
 		//printf("pb1: %1d pb2: %1d\n", pb1Val, pb2Val);
