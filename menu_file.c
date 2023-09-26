@@ -31,7 +31,7 @@ int main() {
     int tall = 1;
     
     // Print display
-    menu_ptr current  = (menu_ptr*)init_menu;
+    menu_ptr current  = (menu_ptr*)menu_play;
     
     //current = &menu_play;
     
