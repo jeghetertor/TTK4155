@@ -66,11 +66,15 @@ Copyright 2003 Kimberly Otten Software Consulting
 #define MCP_RXB1CTRL	0x70
 #define MCP_RXB1SIDH	0x71
 
-#define MCP_TXB0DLC		0x65	
+#define MCP_RXB0DLC		0x65	
+#define MCP_RXB0D0		0x66
+
 #define MCP_TXB0SIDH	0x31
 #define MCP_TXB0SIDL	0x32
-#define MCP_TXB0D0		0x39
-#define MCP_RXB0D0		0x66
+
+#define MCP_TXB0D0		0x36
+#define MCP_TXB0DLC		0x35
+
 
 #define MCP_TX_INT		0x1C		// Enable all transmit interrupts
 #define MCP_TX01_INT	0x0C		// Enable TXB0 and TXB1 interrupts
@@ -124,7 +128,6 @@ Copyright 2003 Kimberly Otten Software Consulting
 #define CLKOUT_PS2		0x01
 #define CLKOUT_PS4		0x02
 #define CLKOUT_PS8		0x03
-
 
 // CNF1 Register Values
 
