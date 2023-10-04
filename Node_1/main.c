@@ -11,6 +11,7 @@
 #include "Menu.h"
 #include "SPI.h"
 #include "MCP2515.h"
+#include "CAN.h"
 
 #define DEBOUNCE_CONST 1000
 #define F_CPU 4915200UL
@@ -123,18 +124,22 @@ int main(void){
 	oled_home();
 	mcp_init();
 	
-	SPI_init();
+	//printf("%0x\n", mcp_read_status());
+	
+	CAN_init();
+	
+	//printf("%0x\n", mcp_read_status());
 	
 	//test_SPI();
 	//test_SPI();
 	//test_SPI();
+	uint8_t c_return;
 	
-	//DDRB |= (1<<PB4);
-	//PORTB |= (1<<PB4);
+	printf("%0x\n", c_return);
 	
-
 	while(1){
 		//test_SPI();
+		
 	}
 	
 

@@ -60,44 +60,18 @@ uint8_t SPI_read(void)
 void test_SPI(){
 	uint8_t char_result;
 	uint8_t cData = 0x13;
+	
 	ss_enable();
-	SPI_send(0x02);
+	SPI_send(0x02); // INSTRUCTION - WRITE
+	SPI_send(0xA7); // ADRESS TO BE WRITTEN TO
+	SPI_send(0x0E); // DATA WRITTEN
 	
-	SPI_send(0xA7);
+	ss_disable(); // INITIATE NEW INSTRUCTION
+	ss_enable();
 	
-	SPI_send(0x0E);
+	SPI_send(0x03);	// INSTRUCTION - READ
+	SPI_send(0xA7);	// ADRESS TO READ
+	char_result = SPI_read(); // READ RESULT
 	
 	ss_disable();
-	ss_enable();
-	SPI_send(0x03);
-	
-	SPI_send(0xA7);
-	
-	//SPI_send(0x00);
-	
-	char_result = SPI_read();
-	
-	ss_disable();
-	
-	
-	/*
-	SPI_send(cData);
-	ss_disable();
-	ss_enable();
-	char_result = SPI_read();
-	//printf("Result: %0x\n", char_result);
-	ss_disable();
-	ss_enable();
-	cData = 0x14;
-	SPI_send(cData);
-	ss_disable();
-	ss_enable();
-	char_result = SPI_read();
-	//printf("Result: %0x\n", char_result);
-	
-	ss_disable();*/
-
-
-	
-
 }

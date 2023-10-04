@@ -42,16 +42,33 @@ uint8_t mcp_read(uint8_t address){
 	return result ;
 }
 
-void mcp_write(uint8_t data){
+void mcp_write(uint8_t data, uint8_t adress){
 	ss_enable();
 	SPI_send(MCP_WRITE);
+	SPI_send(adress);
 	SPI_send(data);
 	ss_disable();
 }
 
-void mcp_request_send(){
+void mcp_request_send(uint8_t buffer_number){
 	ss_enable();
-	//SPI_send(M)
+	switch(buffer_number) {
+		case 0  :
+		SPI_send(0x81);
+		break;
+		
+		case 1  :
+		SPI_send(0x82);
+		break;
+		
+		case 2 :
+		SPI_send(0x84);
+		break;
+	
+		default :
+		break;
+	}
+	ss_disable();
 	
 }
 
