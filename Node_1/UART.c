@@ -6,6 +6,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdio.h>
+#include <stdint.h>
 //int USART_recieve(FILE *);
 //void USART_Init(long);
 //int USART_Transmit(unsigned char, FILE *);

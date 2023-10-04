@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+
 #ifndef CMD_ADDRESS
 #define CMD_ADDRESS  0x1000
 #endif

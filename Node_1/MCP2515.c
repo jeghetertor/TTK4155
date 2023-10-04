@@ -4,6 +4,7 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifndef MCP2515_H_
 #include "MCP2515.h"
@@ -21,7 +22,6 @@ void mcp_init(){
 	SPI_init () ; // Initialize SPI
 	mcp_reset() ; // Send reset - command
 
-	
 	// Self - test
 	value = mcp_read(MCP_CANSTAT);
 	if(( value & MODE_MASK ) != MODE_CONFIG ) {

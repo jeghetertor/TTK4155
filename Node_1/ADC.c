@@ -4,6 +4,7 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #ifndef ADC_H_
 #include "ADC.h"

@@ -4,6 +4,7 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 #ifndef SPI_H_
 #include "SPI.h"
 #endif

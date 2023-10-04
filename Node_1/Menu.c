@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #ifndef Menu_H_
 #include "Menu.h"
 #endif

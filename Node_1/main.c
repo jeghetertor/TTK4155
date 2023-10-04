@@ -4,6 +4,7 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "UART.h"
 #include "ADC.h"
 #include "OLED.h"
@@ -12,7 +13,7 @@
 #include "SPI.h"
 #include "MCP2515.h"
 #include "CAN.h"
-
+#include "MCP_register_definitions.h"
 #define DEBOUNCE_CONST 1000
 #define F_CPU 4915200UL
 #define FOSC 4915200UL
@@ -123,22 +124,23 @@ int main(void){
 	oled_reset();
 	oled_home();
 	mcp_init();
-	
-	//printf("%0x\n", mcp_read_status());
-	
+
 	CAN_init();
 	
-	//printf("%0x\n", mcp_read_status());
+	uint8_t ID_lowerbyte;
+	uint8_t ID_higherbyte;
 	
-	//test_SPI();
-	//test_SPI();
-	//test_SPI();
-	uint8_t c_return;
-	
-	printf("%0x\n", c_return);
-	
+	ID_lowerbyte = mcp_read(MCP_RXB0SIDL);
+	ID_higherbyte = mcp_read(MCP_RXB0SIDH);
+	printf("HIGHRX MAIN %0x, LOWRX %0x\n", ID_higherbyte, ID_lowerbyte);
+			
+	//printf("Hmm: %d\n", mcp_read(MCP_TXB0DLC));
+	CAN_test();
+	//printf("Hmm: %d\n", mcp_read(MCP_TXB0DLC));
 	while(1){
 		//test_SPI();
+		
+		//printf("mode: %x \n",mcp_read(MCP_TXB0DLC));
 		
 	}
 	

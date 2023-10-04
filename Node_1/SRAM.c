@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <avr/io.h>
+#include <stdint.h>
 
 void SRAM_test(void)
 {
