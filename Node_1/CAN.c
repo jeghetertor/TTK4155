@@ -19,7 +19,14 @@
 
 void CAN_init(){
 	// initier i loopback
-	mcp_bit_modify(MCP_CANCTRL, 0b11100000, MODE_LOOPBACK);
+	mcp_bit_modify(MCP_CANCTRL, 0b11100000, MODE_NORMAL);
+	// Usikker
+	mcp_bit_modify(MCP_CANCTRL, 0b00000100, 1); // CLKOUT disabled (?)
+	mcp_write(MCP_CNF1,0b11000111);
+	mcp_write(MCP_CNF2,0b10110001); 
+	mcp_write(MCP_CNF3,0b00000110);
+	
+
 	
 }
 
@@ -77,17 +84,18 @@ void CAN_transmit(CAN_message *can_message, uint8_t buffer_number){
 void CAN_test(){
 	CAN_message my_msg = {
 		0b10,
-		2,
-		"To"
+		3,
+		"TRE"
 	};
 	CAN_message my_msg2;
 
-	CAN_transmit(&my_msg, 1);
-	_delay_ms(10);
-	my_msg2 = CAN_receive(1);
+	//CAN_transmit(&my_msg, 1);
+	//_delay_ms(10);
+	//my_msg2 = CAN_receive(1);
 	
-	printf("Data:\n");
-	printf("Length: %d\n", my_msg2.length);
-	printf("ID: %d\n", my_msg2.ID);
-	printf("Data: %s", my_msg2.data);
+	//printf("Data:\n");
+	//printf("Length: %d\n", my_msg2.length);
+	//printf("ID: %d\n", my_msg2.ID);
+	//printf("Data: %s", my_msg2.data);
+	_delay_ms(100);
 }
