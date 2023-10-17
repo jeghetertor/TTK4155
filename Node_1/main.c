@@ -114,9 +114,10 @@ void print_something(){
 }
 
 int main(void){
+	cli();
 	_delay_ms(200);
 	SRAM_init();
-	//ADC_init();
+	ADC_init();
 	UART_init(MYUBRR);
 	printf("Init program...\n");
 	oled_init();
@@ -126,6 +127,7 @@ int main(void){
 	mcp_init();
 
 	CAN_init();
+	sei();
 	
 	uint8_t ID_lowerbyte;
 	uint8_t ID_higherbyte;
@@ -134,15 +136,8 @@ int main(void){
 	ID_higherbyte = mcp_read(MCP_RXB0SIDH);
 	printf("HIGHRX MAIN %0x, LOWRX %0x\n", ID_higherbyte, ID_lowerbyte);
 			
-	//printf("Hmm: %d\n", mcp_read(MCP_TXB0DLC));
-	CAN_test();
-	//printf("Hmm: %d\n", mcp_read(MCP_TXB0DLC));
-	while(1){
-		//test_SPI();
-		
-		//printf("mode: %x \n",mcp_read(MCP_TXB0DLC));
-		
-	}
+	//CAN_test();
+
 	
 
 	
@@ -222,8 +217,40 @@ int main(void){
 						max_menu_elements = current->num_children;
 					}
 				}
-			}
-	iteration++;
+				}
+			
+			// CAN TEST NEDENFOR
+			//test_SPI();
+			//CAN_message can_msg;
+			//can_msg = CAN_receive(1);
+			//printf("%s", can_msg.data[0]);
+			////printf("mode: %x \n",mcp_read(MCP_TXB0DLC));
+			
+			CAN_message my_msg = {
+				0,
+				1,
+				'l'
+			};
+			
+			uint8_t res;
+			res = mcp_read(0x2D);
+			
+			uint8_t count;
+			count = mcp_read(0x1D);
+			
+			printf("%d\t Receive error cnt: %d",res, count);
+			
+			//CAN_transmit(&my_msg, 2);
+			//printf("%s\n", my_msg.data[0]);
+			//CAN_message can_msg;
+			//CAN_receive(1,&can_msg);
+			//printf("%d\n", can_msg.ID);
+			 // Used for debounce timer
+			 //mcp_bit_modify(MCP_CANINTF, MCP_RX1IF, 0);
+			 //mcp_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
+			
+			iteration++;
+			//printf("%0x", mcp_read(MCP_CANINTF));
 
 	
 	// TEST WRITING TO SPECIFIC PINS
@@ -233,4 +260,14 @@ int main(void){
 	//printf("Fin\n");
 	}
 	return 0;
+}
+
+ISR(INT0_vect){
+	CAN_message msg;
+	//CAN_receive(1, &msg);
+	//printf("%d\n", msg.ID);
+	
+	mcp_bit_modify(MCP_CANINTF, MCP_RX1IF, 0);
+	mcp_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
+	//_delay_ms(100);
 }

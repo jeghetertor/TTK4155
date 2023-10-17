@@ -22,44 +22,45 @@ void CAN_init(){
 	mcp_bit_modify(MCP_CANCTRL, 0b11100000, MODE_NORMAL);
 	// Usikker
 	mcp_bit_modify(MCP_CANCTRL, 0b00000100, 1); // CLKOUT disabled (?)
-	mcp_write(MCP_CNF1,0b11000111);
-	mcp_write(MCP_CNF2,0b10110001); 
-	mcp_write(MCP_CNF3,0b00000110);
 	
+	//TEMP?
+	mcp_bit_modify(MCP_CANINTF, MCP_RX1IF, 0);
+	mcp_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
 
 	
 }
 
-CAN_message CAN_receive(uint8_t buffer_number){
+void CAN_receive(uint8_t buffer_number, CAN_message* can_message){
 	uint8_t ID_lowerbyte;
 	uint8_t ID_higherbyte;
-	CAN_message can_message;	
+	
 	switch(buffer_number) {
-		case 1 :
+		case 0 :
 		ID_higherbyte = mcp_read(MCP_RXB0SIDH);
 		ID_lowerbyte = mcp_read(MCP_RXB0SIDL);
-		can_message.ID = (ID_higherbyte << 3) + (ID_lowerbyte >> 5);
-		can_message.length = mcp_read(MCP_RXB0DLC);
-		for(uint8_t i = 0; i<can_message.length;i++){
-			can_message.data[i] = mcp_read(MCP_RXB0D0+i);
+		can_message->ID = (ID_higherbyte << 3) + (ID_lowerbyte >> 5);
+		can_message->length = mcp_read(MCP_RXB0DLC);
+		for(uint8_t i = 0; i<can_message->length;i++){
+			can_message->data[i] = mcp_read(MCP_RXB0D0+i);
+			
 		}
 		//can_message.data[0] = mcp_read(MCP_RXB0D0);
 		
 		break;
-		/*	
-		case 2  :
-	
-		SPI_send(MCP_RXB1SIDH);
-		can_message.ID = SPI_read();
-		SPI_send(0x76);
-		can_message.data = SPI_read();
+		case 1  :
+		ID_higherbyte = mcp_read(MCP_RXB1SIDH);
+		ID_lowerbyte = mcp_read(MCP_RXB1SIDL);
+		can_message->ID = (ID_higherbyte << 3) + (ID_lowerbyte >> 5);
+		can_message->length = mcp_read(MCP_RXB1DLC);
+		for(uint8_t i = 0; i<can_message->length;i++){
+			can_message->data[i] = mcp_read(MCP_RXB1D0+i);
+		}
 		break;
-		*/
+		
 		default :
 		printf("Invalid buffer!\n");
 		break;
 		}
-	return can_message;
 }
 
 void CAN_transmit(CAN_message *can_message, uint8_t buffer_number){
@@ -69,8 +70,6 @@ void CAN_transmit(CAN_message *can_message, uint8_t buffer_number){
 	uint8_t ID_lowerbyte = (can_message->ID&0x7) << 5;
 	
 	uint8_t ID_higherbyte = (can_message->ID&0x7F8) >> 3;
-	
-	printf("Hele: %0x, lower: %0x, Higher: %0x\n", can_message->ID, ID_lowerbyte, ID_higherbyte);
 	
 	
 	mcp_write(ID_higherbyte, MCP_TXB0SIDH);

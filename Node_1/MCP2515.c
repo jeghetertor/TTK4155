@@ -15,11 +15,19 @@
 #ifndef MCP_register_definitions_H_
 #include "MCP_register_definitions.h"
 #endif
+#include "CAN.h"
 
+void mcp_interupt_enable(){
+	
+	GICR |= (1<<INT0);
+	MCUCR |= (1<<ISC01);
+}
 
 void mcp_init(){
 	uint8_t value ;
 	SPI_init () ; // Initialize SPI
+	//mcp_interupt_enable();
+
 	mcp_reset() ; // Send reset - command
 
 	// Self - test
@@ -27,9 +35,24 @@ void mcp_init(){
 	if(( value & MODE_MASK ) != MODE_CONFIG ) {
 		printf(" MCP2515 is NOT in configuration mode after reset !\n");
 	}
-
-	// More initialization
 	
+	//ENABLE INTERRUPTS
+	mcp_bit_modify(MCP_CANINTE, 0b00000011, 0xFF);
+	
+	uint8_t BRP = 8;
+	uint8_t PS1 = 6;
+	uint8_t PS2 = 5;
+	uint8_t PROPAG = 1;
+	
+	uint8_t CN1_data = SJW4|(BRP -1);
+	uint8_t CN2_data = BTLMODE | SAMPLE_3X | ((PS1 - 1) << 3) | (PROPAG - 1);
+	uint8_t CN3_data = WAKFIL_DISABLE|(PS2-1);
+	printf("CN1: %0x\nCN2: %0x\nCN3: %0x\n", CN1_data, CN2_data, CN3_data);
+		
+	// More initialization
+	mcp_write(MCP_CNF1,CN1_data);
+	mcp_write(MCP_CNF2,CN2_data);
+	mcp_write(MCP_CNF3,CN3_data);
 }
 
 uint8_t mcp_read(uint8_t address){

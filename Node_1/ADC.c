@@ -11,10 +11,12 @@
 #endif 
 
 void ADC_init(void){
-	DDRD |= (1<<PD4);
-	TCCR3B |= (1 << CS30) | (1 << WGM32);
-	TCCR3A |= (1 << COM3A0) | (1 << COM3B0);
-	
+	//DDRD |= (1<<PD4);
+	//TCCR3B |= (1 << CS30) | (1 << WGM32);
+	//TCCR3A |= (1 << COM3A0) | (1 << COM3B0);
+	DDRB |= (1<<PB0);
+	TCCR0 |= (1 <<WGM01) | (1 << COM00) | (1 << CS00);
+	//OCR0 = 0;
 	
 	// ALTERNATE SOLUTION
 	/*char sreg = SREG;
