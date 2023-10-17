@@ -12,54 +12,46 @@
 #include "can_interrupt.h"
 
 
-void delay_ms(int ms){
-	for(int i = 0; i< ms*1000;i++){
-
-	}
-}
-
 int main(void)
 {
 	SystemInit();
+	
+	// Peripherals shit:
+	PMC->PMC_WPMR |=  (0x504d43<<8);
+	PMC->PMC_WPMR &= ~(1<<0);
+	//CAN0->CAN_WPMR |= (0x43414E<<)
+	CAN0->CAN_WPMR &= ~(1<<0);
+	
+	//PMC->PMC_PCER1 = 1;
+	
+	// LED blink Shit
 	/// CONFIG PIN 19 AND 20 AS OUTPUT ///////
 	PIOA->PIO_PER = PIO_PER_P19|PIO_PER_P20;	//ENABLE PORTS
 	PIOA->PIO_OER = PIO_PER_P19|PIO_PER_P20;	//SET AS OUTPUT
 	//////////////////////////////////////////
-	PMC->PMC_PCER1 = 1;
-	// ENABLE 
-	//PMC_PCR_EN-> 
 	
-	
-	int iteration = 0;
 	configure_uart();
+	init_can();
 	
-	can_init_def_tx_rx_mb(BAUD_REGISTER_CAN);
-	
-	
-	
-	CAN_MESSAGE msg = {
-		1,
-		1,
-		'a'
-	};
-	
-	
-	
-    /* Replace with your application code */
     while (1) 
     {
 		uint8_t var;
-		CAN_MESSAGE can_msg = {
+		CAN_MESSAGE msg = {
 			0,
 			1,
-			'a'
+			'l'
 			};
-		//var = can_receive(&can_msg, 1);
-		//printf(can_msg.data);
-		can_send(&msg, 0);
+
+		CAN_MESSAGE recived_msg;
 		
-		printf(msg.data);
-		/*
+		
+		// LOOP DELAY
+
+		can_send(&msg, 0);
+		//can_receive(msg,0);
+		
+		
+		/* LED BLINK
 		if(iteration < 50000){
 			PIOA->PIO_CODR = PIO_PER_P19|PIO_PER_P20;
 		}

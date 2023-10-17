@@ -14,7 +14,12 @@
 
 #include <stdint.h>
 // 
-#define BAUD_REGISTER_CAN 0x2A3166
+#define BAUD_phase1_pos 4
+#define BAUD_phase2_pos 0
+#define BAUD_propag_pos 8
+#define BAUD_sjw_pos 12
+#define BAUD_brp_pos 16
+#define BAUD_smp_pos 24
 
 
 typedef struct can_message_t
@@ -29,5 +34,7 @@ uint8_t can_init(uint32_t can_br, uint8_t num_tx_mb, uint8_t num_rx_mb);
 
 uint8_t can_send(CAN_MESSAGE* can_msg, uint8_t mailbox_id);
 uint8_t can_receive(CAN_MESSAGE* can_msg, uint8_t mailbox_id);
+
+void init_can();
 
 #endif /* CAN_CONTROLLER_H_ */

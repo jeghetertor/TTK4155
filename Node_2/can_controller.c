@@ -24,10 +24,29 @@
  *
  * \retval Success(0) or failure(1)
  */
+
+void init_can(){
+	uint32_t can_br;
+	can_br |= 6 << BAUD_phase1_pos;
+	can_br |= 5 << BAUD_phase2_pos;
+	can_br |= 1 << BAUD_propag_pos;
+	can_br |= 4 << BAUD_sjw_pos;
+	can_br |= 42 << BAUD_brp_pos;
+	can_br |= 1 << BAUD_smp_pos;
+	can_init_def_tx_rx_mb(can_br);
+}
+
 uint8_t can_init_def_tx_rx_mb(uint32_t can_br)
 {
 	// disable watchdog
 	WDT->WDT_MR = (1<<15);
+	uint8_t state = can_init(can_br, 1, 2);
+	if(state == 0){
+		printf("CAN init success!");
+	}
+	else{
+		printf("Can init failure!");
+	}
 	return can_init(can_br, 1, 2);
 }
 
