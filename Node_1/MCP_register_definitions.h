@@ -168,4 +168,7 @@ Copyright 2003 Kimberly Otten Software Consulting
 
 
 
+
+//#define MCP_TXB1SIDH
+
 #endif

@@ -21,11 +21,11 @@ void CAN_init(){
 	// initier i loopback
 	mcp_bit_modify(MCP_CANCTRL, 0b11100000, MODE_NORMAL);
 	// Usikker
-	mcp_bit_modify(MCP_CANCTRL, 0b00000100, 1); // CLKOUT disabled (?)
+	//mcp_bit_modify(MCP_CANCTRL, 0b00000100, 0xff); // CLKOUT disabled (?)
 	
 	//TEMP?
-	mcp_bit_modify(MCP_CANINTF, MCP_RX1IF, 0);
-	mcp_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
+	//mcp_bit_modify(MCP_CANINTE, 0xFF, 0b1);
+	//mcp_bit_modify(MCP_CANINTE, 0xFF, 0b1);
 
 	
 }
@@ -40,27 +40,32 @@ void CAN_receive(uint8_t buffer_number, CAN_message* can_message){
 		ID_lowerbyte = mcp_read(MCP_RXB0SIDL);
 		can_message->ID = (ID_higherbyte << 3) + (ID_lowerbyte >> 5);
 		can_message->length = mcp_read(MCP_RXB0DLC);
-		for(uint8_t i = 0; i<can_message->length;i++){
+		for(uint8_t i = 0; (i<can_message->length) && i<8;i++){
 			can_message->data[i] = mcp_read(MCP_RXB0D0+i);
 			
 		}
+		
+		mcp_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
 		//can_message.data[0] = mcp_read(MCP_RXB0D0);
 		
 		break;
 		case 1  :
+		
 		ID_higherbyte = mcp_read(MCP_RXB1SIDH);
 		ID_lowerbyte = mcp_read(MCP_RXB1SIDL);
 		can_message->ID = (ID_higherbyte << 3) + (ID_lowerbyte >> 5);
 		can_message->length = mcp_read(MCP_RXB1DLC);
-		for(uint8_t i = 0; i<can_message->length;i++){
+		for(uint8_t i = 0; (i<can_message->length) && i<8;i++){
 			can_message->data[i] = mcp_read(MCP_RXB1D0+i);
 		}
+		mcp_bit_modify(MCP_CANINTF,MCP_RX1IF , 0);
 		break;
-		
 		default :
 		printf("Invalid buffer!\n");
 		break;
 		}
+	
+	
 }
 
 void CAN_transmit(CAN_message *can_message, uint8_t buffer_number){
@@ -79,6 +84,17 @@ void CAN_transmit(CAN_message *can_message, uint8_t buffer_number){
 		mcp_write(can_message->data[i],MCP_TXB0D0+i);	
 	}
 	mcp_request_send(0);
+	/*else if (buffer_number == 1){
+		mcp_write(ID_higherbyte, MCP_TXB1SIDH);
+		mcp_write(ID_lowerbyte, MCP_TXB1SIDL);
+		mcp_write(can_message->length, MCP_TXB1DLC);
+		for(uint8_t i = 0; i<can_message->length;i++){
+			mcp_write(can_message->data[i],MCP_TXB1D0+i);
+		}
+		mcp_request_send(1);
+	}*/	
+	//}
+	
 }
 void CAN_test(){
 	CAN_message my_msg = {
@@ -88,13 +104,13 @@ void CAN_test(){
 	};
 	CAN_message my_msg2;
 
-	//CAN_transmit(&my_msg, 1);
-	//_delay_ms(10);
-	//my_msg2 = CAN_receive(1);
+	CAN_transmit(&my_msg, 1);
+	_delay_ms(10);
+	CAN_receive(0,&my_msg2);
 	
-	//printf("Data:\n");
-	//printf("Length: %d\n", my_msg2.length);
-	//printf("ID: %d\n", my_msg2.ID);
-	//printf("Data: %s", my_msg2.data);
+	printf("Data:\n");
+	printf("Length: %d\n", my_msg2.length);
+	printf("ID: %d\n", my_msg2.ID);
+	printf("Data: %s", my_msg2.data);
 	_delay_ms(100);
 }

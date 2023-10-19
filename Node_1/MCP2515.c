@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <assert.h>
 
 #ifndef MCP2515_H_
 #include "MCP2515.h"
@@ -26,10 +27,7 @@ void mcp_interupt_enable(){
 void mcp_init(){
 	uint8_t value ;
 	SPI_init () ; // Initialize SPI
-	//mcp_interupt_enable();
-
 	mcp_reset() ; // Send reset - command
-
 	// Self - test
 	value = mcp_read(MCP_CANSTAT);
 	if(( value & MODE_MASK ) != MODE_CONFIG ) {
@@ -37,22 +35,33 @@ void mcp_init(){
 	}
 	
 	//ENABLE INTERRUPTS
-	mcp_bit_modify(MCP_CANINTE, 0b00000011, 0xFF);
+	//mcp_interupt_enable();
 	
-	uint8_t BRP = 8;
-	uint8_t PS1 = 6;
-	uint8_t PS2 = 5;
-	uint8_t PROPAG = 1;
+	const uint8_t BRP = 4;
+	const uint8_t PS1 = 6;
+	const uint8_t PS2 = 5;
+	const uint8_t PROPAG = 1;
+	const uint8_t SJW = 3;
+	const uint8_t SYNC = 1;
+
 	
-	uint8_t CN1_data = SJW4|(BRP -1);
-	uint8_t CN2_data = BTLMODE | SAMPLE_3X | ((PS1 - 1) << 3) | (PROPAG - 1);
-	uint8_t CN3_data = WAKFIL_DISABLE|(PS2-1);
+	
+	uint8_t CN1_data = ((1)<<6)|(11<<0);
+	uint8_t CN2_data = (1<<7)|(1<<6)|(3<<3)|(3<<0);
+	int8_t CN3_data = (4<<0);
+	
+	//uint8_t CN1_data = ((SJW) << 6) | ((BRP) << 0);
+	//uint8_t CN2_data = BTLMODE | SAMPLE_3X | ((PS1) << 3) | ((PROPAG) << 0);
+	//uint8_t CN3_data = WAKFIL_DISABLE|(PS2);
+	
 	printf("CN1: %0x\nCN2: %0x\nCN3: %0x\n", CN1_data, CN2_data, CN3_data);
 		
 	// More initialization
-	mcp_write(MCP_CNF1,CN1_data);
-	mcp_write(MCP_CNF2,CN2_data);
-	mcp_write(MCP_CNF3,CN3_data);
+	mcp_write(CN1_data, MCP_CNF1);
+	mcp_write(CN2_data, MCP_CNF2);
+	mcp_write(CN3_data, MCP_CNF3);
+	
+	mcp_bit_modify(MCP_CANINTE, 0xFF, 0x11);
 }
 
 uint8_t mcp_read(uint8_t address){

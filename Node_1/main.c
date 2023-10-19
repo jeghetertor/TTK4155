@@ -14,13 +14,13 @@
 #include "MCP2515.h"
 #include "CAN.h"
 #include "MCP_register_definitions.h"
-#define DEBOUNCE_CONST 1000
+#define DEBOUNCE_CONST 0
 #define F_CPU 4915200UL
 #define FOSC 4915200UL
 #define BAUD 9600UL
 #define MYUBRR (FOSC/(16UL*BAUD))-1
 
-
+CAN_message msg;
 
 struct JoyAngle {
 	uint8_t x;
@@ -119,7 +119,7 @@ int main(void){
 	SRAM_init();
 	ADC_init();
 	UART_init(MYUBRR);
-	printf("Init program...\n");
+	printf("\nInit program...\n");
 	oled_init();
 	oled_page_addressing();
 	oled_reset();
@@ -137,8 +137,20 @@ int main(void){
 	printf("HIGHRX MAIN %0x, LOWRX %0x\n", ID_higherbyte, ID_lowerbyte);
 			
 	//CAN_test();
-
+	uint8_t flag;
+	CAN_message my_msg = {
+		0,
+		1,
+		't'
+	};
 	
+	//while(1){
+	//	CAN_transmit(&my_msg, 0);
+	//	printf("%d\n", my_msg.data[0]);
+	//	_delay_ms(100);
+	//}
+
+
 
 	
 	// INITIATING MENU ELEMENTS
@@ -171,11 +183,14 @@ int main(void){
 	const struct Offset_const offset_const = ADC_calibration();
 	bool oled_inverted_colors = false;
 	//struct ADC adc;
+	struct ADC adc;
+	adc = ADC_output(offset_const);
 	uint8_t joy_direction = Joy_direction(offset_const);
 
 	uint8_t current_line_number = 0;	
 
 	while(1){ // game loop
+			adc = ADC_output(offset_const);
 			
 			if(Joy_direction(offset_const) != joy_direction
 				& iteration > DEBOUNCE_CONST){
@@ -218,41 +233,29 @@ int main(void){
 					}
 				}
 				}
+			my_msg.length = 2;
+			my_msg.data[0] = (int8_t) adc.x_axis;
+			my_msg.data[1] = (int8_t) adc.y_axis;
+			CAN_transmit(&my_msg,0);
 			
-			// CAN TEST NEDENFOR
-			//test_SPI();
-			//CAN_message can_msg;
-			//can_msg = CAN_receive(1);
-			//printf("%s", can_msg.data[0]);
-			////printf("mode: %x \n",mcp_read(MCP_TXB0DLC));
-			
-			CAN_message my_msg = {
-				0,
-				1,
-				'l'
-			};
-			
-			uint8_t res;
-			res = mcp_read(0x2D);
-			
-			uint8_t count;
-			count = mcp_read(0x1D);
-			
-			printf("%d\t Receive error cnt: %d",res, count);
-			
-			//CAN_transmit(&my_msg, 2);
-			//printf("%s\n", my_msg.data[0]);
-			//CAN_message can_msg;
-			//CAN_receive(1,&can_msg);
-			//printf("%d\n", can_msg.ID);
+			printf("data: %d\n", (int8_t) my_msg.data[0]);
+			flag = mcp_read(MCP_CANINTF);
+			if(flag&MCP_RX0IF){
+				printf("buffer0");
+				CAN_receive(0,&msg);
+				
+			}
+			else if(flag&MCP_RX1IF){
+				printf("buffer1");
+				CAN_receive(1,&msg);
+				//printf("data: %0x",msg.data[0]);
+				//printf("data: %0x",msg.data[0]);
+				//printf("data: %0x %0x %0x \n",msg.data[0],msg.data[1],msg.data[2]);
+			}
 			 // Used for debounce timer
-			 //mcp_bit_modify(MCP_CANINTF, MCP_RX1IF, 0);
-			 //mcp_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
-			
-			iteration++;
-			//printf("%0x", mcp_read(MCP_CANINTF));
 
-	
+			iteration++;
+
 	// TEST WRITING TO SPECIFIC PINS
 	//bool pb1Val = PINB & (1 << PINB1);
 	//bool pb2Val = PINB & (1 << PINB2);
@@ -263,9 +266,8 @@ int main(void){
 }
 
 ISR(INT0_vect){
-	CAN_message msg;
-	//CAN_receive(1, &msg);
-	//printf("%d\n", msg.ID);
+	CAN_receive(1, &msg);
+	printf("%d\n", msg.ID);
 	
 	mcp_bit_modify(MCP_CANINTF, MCP_RX1IF, 0);
 	mcp_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);

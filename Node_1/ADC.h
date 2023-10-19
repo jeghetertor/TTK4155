@@ -7,8 +7,8 @@ struct ADC {
 	int r_slider;
 	int x_axis;
 	int y_axis;
-	int x_axis_percent;
-	int y_axis_percent;
+	int8_t x_axis_percent;
+	int8_t y_axis_percent;
 	uint8_t state_x;
 	uint8_t state_y;
 };
