@@ -27,12 +27,24 @@
 
 void init_can(){
 	uint32_t can_br;
-	can_br |= 6 << BAUD_phase1_pos;
-	can_br |= 5 << BAUD_phase2_pos;
-	can_br |= 1 << BAUD_propag_pos;
-	can_br |= 4 << BAUD_sjw_pos;
-	can_br |= 42 << BAUD_brp_pos;
-	can_br |= 1 << BAUD_smp_pos;
+	
+	//can_br = 6 << BAUD_phase1_pos;
+	//can_br |= 5 << BAUD_phase2_pos;
+	//can_br |= 1 << BAUD_propag_pos;
+	//can_br |= 3 << BAUD_sjw_pos;
+	//can_br |= 41 << BAUD_brp_pos;
+	//
+	//can_br |= 1 << BAUD_smp_pos;
+	can_br = 125 << CAN_BR_BRP_Pos;
+	can_br |= 1 << CAN_BR_SJW_Pos;
+	can_br |= 3 << CAN_BR_PHASE1_Pos;
+	can_br |= 3 << CAN_BR_PROPAG_Pos;
+	can_br |= 4 << CAN_BR_PHASE2_Pos;
+	
+	
+	
+	//can_br |= 1 << BAUD_smp_pos;	
+	
 	can_init_def_tx_rx_mb(can_br);
 }
 

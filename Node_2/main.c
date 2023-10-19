@@ -4,12 +4,23 @@
  * Created: 10.10.2023 08:23:00
  * Author : torhstau
  */ 
+#include <stdlib.h>
+#include <stdint.h>
+
+#include "Structs.h"
 
 #include "uart.h"
 #include "printf-stdarg.h"
 #include "sam.h"
 #include "can_controller.h"
 #include "can_interrupt.h"
+
+
+/*struct ADC {
+	int8_t x_axis;
+	int8_t y_axis;
+};*/
+
 
 
 int main(void)
@@ -32,23 +43,31 @@ int main(void)
 	
 	configure_uart();
 	init_can();
-	
+	//sei();
     while (1) 
     {
 		uint8_t var;
 		CAN_MESSAGE msg = {
 			0,
-			1,
-			'l'
+			3,
+			"lqr"
 			};
 
-		CAN_MESSAGE recived_msg;
+		CAN_MESSAGE received_msg;
 		
 		
 		// LOOP DELAY
-
-		can_send(&msg, 0);
-		//can_receive(msg,0);
+		
+		
+		
+		while(1){
+			can_send(&msg, 0);
+			//can_receive(&received_msg, 1);
+			//printf("%d", received_msg.data[0]);
+			CAN0_Handler();
+			printf("x: %d  ", joy.x);
+			printf("y: %d\n", joy.y);
+			};
 		
 		
 		/* LED BLINK

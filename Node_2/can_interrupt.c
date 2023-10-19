@@ -7,7 +7,7 @@
  * NTNU - Norwegian University of Science and Technology
  *
  */ 
-
+#include "Structs.h"
 #include "can_interrupt.h"
 
 #include <stdio.h>
@@ -38,12 +38,14 @@ void CAN0_Handler( void )
 		if(can_sr & CAN_SR_MB1)  //Mailbox 1 event
 		{
 			can_receive(&message, 1);
+			
 
 		}
 		else if(can_sr & CAN_SR_MB2) //Mailbox 2 event
 		
 		{
 			can_receive(&message, 2);
+			
 		}
 		else
 		{
@@ -57,6 +59,12 @@ void CAN0_Handler( void )
 			if(DEBUG_INTERRUPT)printf("%d ", message.data[i]);
 		}
 		if(DEBUG_INTERRUPT)printf("\n\r");
+		
+	if(message.id == joy_id){
+		joy.x = message.data[0];
+		joy.y = message.data[1];
+	}
+	
 	}
 	
 	if(can_sr & CAN_SR_MB0)
