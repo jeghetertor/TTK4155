@@ -45,6 +45,31 @@ void ADC_init(void){
 	//DDD5 = 1;
 	//sei();
 }
+struct JoyAngle read_joy_angle(void){
+	volatile char *adc_mem = (char *) 0x1400;
+	adc_mem[0] = 0x04;
+	struct JoyAngle angles;
+	_delay_ms(10);
+	uint8_t x_axis = adc_mem[0];
+	uint8_t y_axis = adc_mem[1];
+	angles.x = 100*adc_mem[0]/255;
+	angles.y = 100*adc_mem[1]/255;
+	return angles;
+}
+
+
+//void ADC_PWM_clock_init(){}
+struct Sliders read_slider(void){
+	volatile char *adc_mem = (char *) 0x1400;
+	adc_mem[0] = 0x04;
+	struct Sliders slider;
+	_delay_ms(10);
+	uint8_t l_slider = adc_mem[2];
+	uint8_t r_slider = adc_mem[3];
+	slider.left = 100*adc_mem[2]/255;
+	slider.right = 100*adc_mem[3]/255;
+	return slider;
+}
 struct ADC  ADC_read(void){
 	volatile char *adc_mem = (char *) 0x1400;
 	adc_mem[0] = 0x04;
@@ -116,7 +141,7 @@ struct Offset_const ADC_calibration(void){
 Joy_Mode Joy_direction(struct Offset_const offset_const){
 	Joy_Mode joy_dir;
 	struct ADC adc = ADC_output(offset_const); // move this out. Take this as argument
-	int neutral_threshold = 3;
+	int neutral_threshold = 5;
 	
 	if(neutral_threshold >= abs(adc.x_axis) &&
 		neutral_threshold >= abs(adc.y_axis)
