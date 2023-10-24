@@ -14,14 +14,30 @@
 #include "sam.h"
 #include "can_controller.h"
 #include "can_interrupt.h"
+#include "adc.h"
+#include "pwm.h"
+#include <stdbool.h>
 
 
-/*struct ADC {
-	int8_t x_axis;
-	int8_t y_axis;
-};*/
 
 
+void goal_scored(Goal *goal, int IR_val){
+	if(goal->debounce > 50){
+		if((IR_val < 2300)&&(goal->scored_flag == 0)){
+			goal->scored_flag = 1;
+			goal->current_goal++;
+			goal->debounce = 0;				
+		}
+	}
+	if((IR_val > 2300) && goal->scored_flag == 1){
+		goal->scored_flag = 0;
+	}
+	goal->debounce++;
+}
+
+void goal_reset(int *goal){
+	goal = 0;
+}
 
 int main(void)
 {
@@ -43,7 +59,10 @@ int main(void)
 	
 	configure_uart();
 	init_can();
+	pwm_init();
+	adc_init();
 	//sei();
+	Goal goal = {0,0,100};
     while (1) 
     {
 		uint8_t var;
@@ -59,14 +78,23 @@ int main(void)
 		// LOOP DELAY
 		
 		
-		
+				
 		while(1){
+			
+			msg.data[0] = goal.current_goal;
+			msg.data_length = 1;
 			can_send(&msg, 0);
 			//can_receive(&received_msg, 1);
 			//printf("%d", received_msg.data[0]);
 			CAN0_Handler();
-			printf("x: %d  ", joy.x);
-			printf("y: %d\n", joy.y);
+			//printf("x: %d  ", joy.x);
+			
+			//printf("y: %d\n", joy.y);
+			servo_set_position(-joy.x);
+			//printf("%d\n",ADC->ADC_CDR[0]);
+			goal_scored(&goal, ADC->ADC_CDR[0]);
+			printf("Goals: %d   ADCval: %d\n", goal.current_goal, ADC->ADC_CDR[0]);
+			
 			};
 		
 		
