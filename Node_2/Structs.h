@@ -4,6 +4,7 @@
 typedef struct Joy{
 	int8_t x;
 	int8_t y;
+	uint8_t r_slider;
 } Joy;
 
 Joy joy;

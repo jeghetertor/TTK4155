@@ -63,6 +63,7 @@ void CAN0_Handler( void )
 	if(message.id == joy_id){
 		joy.x = message.data[0];
 		joy.y = message.data[1];
+		joy.r_slider = message.data[2];
 	}
 	
 	}
