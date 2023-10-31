@@ -23,4 +23,5 @@ menu_element* add_menu_element(menu_element* parent, char * text, void (* functi
 
 void main_menu();
 void print_something();
+void play_game1();
 #endif

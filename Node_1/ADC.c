@@ -128,20 +128,18 @@ int max(int x, int y){
 }
 
 struct Offset_const ADC_calibration(void){
-	struct Offset_const offset_init;
-	offset_init.offset_x = 0;
-	offset_init.offset_y = 0;
 	struct ADC adc = ADC_read();
 	struct Offset_const offset_consts;
 	offset_consts.offset_x = adc.x_axis;
 	offset_consts.offset_y = adc.y_axis;
+	printf("VALUES READ! x:%d y:%d\n", adc.x_axis, adc.y_axis);
+	printf("CALIBRATED! x:%d y:%d\n", offset_consts.offset_x, offset_consts.offset_y);
 	return offset_consts;
 }
 
-Joy_Mode Joy_direction(struct Offset_const offset_const){
+Joy_Mode Joy_direction(struct Offset_const offset_const, struct ADC adc){
 	Joy_Mode joy_dir;
-	struct ADC adc = ADC_output(offset_const); // move this out. Take this as argument
-	int neutral_threshold = 5;
+	int neutral_threshold = 25;
 	
 	if(neutral_threshold >= abs(adc.x_axis) &&
 		neutral_threshold >= abs(adc.y_axis)
@@ -166,3 +164,4 @@ Joy_Mode Joy_direction(struct Offset_const offset_const){
 	joy_dir = UP;
 	return joy_dir;
 }
+

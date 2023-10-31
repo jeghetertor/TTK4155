@@ -24,7 +24,6 @@ CAN_message msg;
 
 
 
-
 void latch_test(void){
 	uint8_t byte = 0x1800;
 	DDRA = byte;
@@ -89,9 +88,10 @@ int main(void){
 	mcp_init();
 
 	CAN_init();
+	
 	sei();
 
-	
+	printf("\n\n\n\n\n\n\n\n\n\nBOOOT\n");
 	
 	main_menu();
 	

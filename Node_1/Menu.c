@@ -40,14 +40,56 @@ menu_element* add_menu_element(menu_element* parent, char * text, void (* functi
 
 
 
-void play_game1(void){
+void play_game1(){
+	oled_reset();
+	oled_pos(3, 0);
+	oled_print("Dont");
+	oled_pos(4, 0);
+	oled_print("touch");
+	oled_pos(6, 0);
+	oled_print("joystick!");
+	_delay_ms(20000);
+
+	
 	CAN_message msg;
 	oled_reset();
+	CAN_message my_msg = {
+		0,
+		1,
+		't'
+	};
 	
+	struct ADC adc = ADC_read();
+	uint8_t flag;
+	struct Offset_const offset_const = ADC_calibration(); // Calibrating ADC
 	while(1){
+		//struct ADC adc_raw = ADC_read();
+		//printf("x_raw %d y_raw %d\n", adc_raw.x_axis, adc_raw.y_axis);
+		
+		adc = ADC_output(offset_const);
 		CAN_receive(1,&msg);
 		oled_pos(6, 0);
 		oled_print("Goal: %d", msg.data[0]);
+		my_msg.length = 3;
+		my_msg.data[0] = adc.x_axis;
+		my_msg.data[1] = adc.y_axis;
+		my_msg.data[2] = adc.r_slider;
+		CAN_transmit(&my_msg,0);
+		//printf("x:%d \n" adc.x_axis);
+		//printf("data: %d\n",adc.x_axis);
+		flag = mcp_read(MCP_CANINTF);
+		if(flag&MCP_RX0IF){
+			//printf("buffer0 receive\n");
+			CAN_receive(0,&msg);
+			
+		}
+		else if(flag&MCP_RX1IF){
+			//printf("buffer1 receive\n");
+			CAN_receive(1,&msg);
+			//printf("%d",msg.data[0]);
+		}
+		//printf("%d\n", adc.x_axis);
+		//printf("Offset const: %d \n", offset_const.offset_x);
 	}
 }
 
@@ -92,21 +134,24 @@ void main_menu(){
 	//struct ADC adc;
 	struct ADC adc;
 	adc = ADC_output(offset_const);
-	uint8_t joy_direction = Joy_direction(offset_const);
+	uint8_t joy_direction = Joy_direction(offset_const, adc);
 
 	uint8_t current_line_number = 0;
 
 	
 	
 	while(1){ // game loop
+		struct ADC adc_raw = ADC_read();
+		printf("x_raw %d y_raw %d\n", adc_raw.x_axis, adc_raw.y_axis);
 		adc = ADC_output(offset_const);
-		printf("%d \n", joy_direction);
-		if((Joy_direction(offset_const) != joy_direction && iteration >= DEBOUNCE_CONST) ||
+		//printf("Joy dir: %d  Xaxis: %d \n", joy_direction, adc.x_axis);
+		
+		if((Joy_direction(offset_const, adc) != joy_direction && iteration >= DEBOUNCE_CONST) ||
 		iteration == DEBOUNCE_CONST
 		){
 			iteration = 0;
 			oled_reset();
-			joy_direction = Joy_direction(offset_const);
+			joy_direction = Joy_direction(offset_const, adc);
 
 			// new frame
 			current_line_number = move_arrow(current_line_number, joy_direction, max_menu_elements);
@@ -144,23 +189,7 @@ void main_menu(){
 				}
 			}
 		}
-		my_msg.length = 2;
-		my_msg.data[0] = adc.x_axis;
-		my_msg.data[1] = adc.y_axis;
-		CAN_transmit(&my_msg,0);
-		//printf("x:%d \n" adc.x_axis);
-		//printf("data: %d\n",adc.x_axis);
-		flag = mcp_read(MCP_CANINTF);
-		if(flag&MCP_RX0IF){
-			//printf("buffer0 receive\n");
-			CAN_receive(0,&msg);
-			
-		}
-		else if(flag&MCP_RX1IF){
-			//printf("buffer1 receive\n");
-			CAN_receive(1,&msg);
-			//printf("%d",msg.data[0]);
-		}
+		
 
 		// Used for debounce timer
 		iteration++;
