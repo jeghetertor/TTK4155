@@ -74,6 +74,9 @@ void ADC_PWM_clock_init(void){
 	//sei();
 }
 
+void init_rt(){
+	
+}
 
 int main(void){
 	cli();

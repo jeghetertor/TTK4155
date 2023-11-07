@@ -41,6 +41,8 @@ menu_element* add_menu_element(menu_element* parent, char * text, void (* functi
 
 
 void play_game1(){
+	
+	bool game_running = true;
 	oled_reset();
 	oled_pos(3, 0);
 	oled_print("Dont");
@@ -50,8 +52,13 @@ void play_game1(){
 	oled_print("joystick!");
 	_delay_ms(20000);
 
-	
+	CAN_message reset_msg = {
+		1,
+		1,
+		'r'
+	};
 	CAN_message msg;
+	CAN_transmit(&reset_msg,0);
 	oled_reset();
 	CAN_message my_msg = {
 		0,
@@ -62,7 +69,7 @@ void play_game1(){
 	struct ADC adc = ADC_read();
 	uint8_t flag;
 	struct Offset_const offset_const = ADC_calibration(); // Calibrating ADC
-	while(1){
+	while(game_running){
 		//struct ADC adc_raw = ADC_read();
 		//printf("x_raw %d y_raw %d\n", adc_raw.x_axis, adc_raw.y_axis);
 		
@@ -88,9 +95,22 @@ void play_game1(){
 			CAN_receive(1,&msg);
 			//printf("%d",msg.data[0]);
 		}
+		if(msg.data[0] > 5){
+			game_running = false;
+		}
 		//printf("%d\n", adc.x_axis);
 		//printf("Offset const: %d \n", offset_const.offset_x);
 	}
+	
+	oled_reset();
+	oled_pos(3, 0);
+	oled_print("U");
+	oled_pos(4, 0);
+	oled_print("R");
+	oled_pos(6, 0);
+	oled_print("Luser!");
+	_delay_ms(20000);
+	CAN_transmit(&reset_msg,0);
 }
 
 void main_menu(){
