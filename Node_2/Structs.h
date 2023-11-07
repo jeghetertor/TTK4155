@@ -15,3 +15,5 @@ typedef struct Goal{
 	long debounce;
 	bool scored_flag;
 	} Goal;
+	
+	Goal goal;

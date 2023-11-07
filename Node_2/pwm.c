@@ -5,7 +5,7 @@ void pwm_init(){
 	//printf("123");
 	//printf("WPMR: %0x",PIOC->PIO_WPMR);
 	// WRONG SCHEMATIC PIN45 -> CHANNEL5, PIN44 -> CHANNEL6
-	PMC->PMC_PCR |= (36<<0);
+	//PMC->PMC_PCR |= (36<<0);
 	PMC->PMC_PCER1 |= 1 <<(36-32);
 	PIOC->PIO_WPMR |= (0x50494F<<8);
 	PIOC->PIO_WPMR &= ~(1<<0); // DISABLE WRITE PROTECTION
@@ -38,6 +38,7 @@ void servo_set_position(int pos){
 	//}
 	
 	//duty = (-duty*20E-3 +20E-3)656250 =
+	
 	long foo;
 	foo = map(pos, -100,100,11812,12468);
 	if((foo <= 12468) && (foo >= 11812)){

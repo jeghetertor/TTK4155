@@ -14,6 +14,7 @@
 void CAN0_Handler       ( void );
 
 #define joy_id 0
+#define reset_score_id 1
 
 
 

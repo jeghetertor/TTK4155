@@ -22,6 +22,32 @@
 #include "solenoid.h"
 #include <stdbool.h>
 
+long position = 0;
+int error_sum = 5;
+int lastEncoderReading;
+int currentEncoderReading;
+void PID(int r, int y,double Kp,double Ki, int* error_sum, double T){
+	r = map(r,0,255,-100,100);
+	int satp = 100;
+	int satm = -satp;
+	int e = r - y;
+	*error_sum += e*T;
+	int u_p = Kp*e;
+	int u_i = 0;
+	//int u_i = Ki*(*error_sum);
+	int u = u_p+u_i;
+	if (u > satp){
+		u = satp;
+		
+	}else if (u < satm){
+		u = satm;
+	}
+	//motor_write(direction,abs(u));
+	motor_openloop(u,350);
+	printf("r: %d, y: %d, u_p: %d, u_i: %d\n", r, y, u_p, u_i);
+}
+
+
 
 void goal_scored(Goal *goal, int IR_val){
 	if(goal->debounce > 50){
@@ -43,6 +69,7 @@ void goal_reset(int *goal){
 
 int main(void)
 {
+	
 	
 	SystemInit();
 	// RTT PRESCALER
@@ -67,11 +94,13 @@ int main(void)
 	pwm_init();
 	adc_init();
 	motor_init();
-	motor_start();
 	solenoid_init();
-
+	
 	//sei();
-	Goal goal = {0,0,100};
+	goal.current_goal = 0;
+	goal.debounce = 0;
+	goal.old_goal = 0;
+	goal.scored_flag = 0;
 	
     while (1) 
     {
@@ -83,9 +112,21 @@ int main(void)
 			};
 
 		CAN_MESSAGE received_msg;
-
+		
+		//PIOD->PIO_CODR |= NOT_RST;
+		//delay_us(20);
+		//PIOD->PIO_SODR |= NOT_RST;
+		//while(1){
+		//	printf("%d \n",motor_read_encoder());
+		//}
+		
 		// LOOP DELAY
+		lastEncoderReading = motor_read_encoder();
 		while(1){
+			//printf("\nBefore\n %d", 0);
+			
+			//printf("After\n %d", 0);
+			//printf("timer: %d \n", ini);
 			msg.data[0] = goal.current_goal;
 			msg.data_length = 1;
 			can_send(&msg, 0);
@@ -95,7 +136,7 @@ int main(void)
 			//printf("x: %d  ", joy.x);
 			
 			//printf("y: %d\n", joy.y);
-			servo_set_position(joy.r_slider - 128);
+			servo_set_position(joy.x);
 			// -joy.x
 			//printf("%d\n",ADC->ADC_CDR[0]);
 			goal_scored(&goal, ADC->ADC_CDR[0]);
@@ -110,10 +151,24 @@ int main(void)
 			
 			PIOD->PIO_CODR = NOT_OE;
 			//printf("x %d\n", joy.x);
-			motor_openloop(joy.x);
-			printf("Slider: %d\n", joy.r_slider);
+	
+			//motor_openloop(joy.x);
+			int16_t val = 0;
+			//for (int i = 0; i<100; i++){
+			//	val += motor_read_encoder();
+			//};
+			//val = val/100;
+			//printf("%d\n", motor_read_encoder());
+			//currentEncoderReading = motor_read_encoder();
+			//if(abs(currentEncoderReading-lastEncoderReading) < 20){
+			//	lastEncoderReading = currentEncoderReading;
+			//}
+			//printf("last: %d, current: %d\n", lastEncoderReading,currentEncoderReading);
+			PID(joy.r_slider,motor_read_encoder(),0.35, 1.0, &error_sum, 0.01);
+			
+			//
+			//printf("Encoder: %d\n", motor_read_encoder());
 			if(joy.y>20){
-				printf("LAUNCH");
 				solenoid_control(true);
 			}
 			else{

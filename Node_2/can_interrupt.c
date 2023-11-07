@@ -65,6 +65,9 @@ void CAN0_Handler( void )
 		joy.y = message.data[1];
 		joy.r_slider = message.data[2];
 	}
+	if(message.id == reset_score_id){
+		goal.current_goal = 0;
+	}
 	
 	}
 	

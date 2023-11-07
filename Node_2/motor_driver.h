@@ -17,8 +17,12 @@
 #define encoder5 PIO_PC6
 #define encoder6 PIO_PC7
 #define encoder7 PIO_PC8
-
+#define ENCODERMASK 0x1FE
+#define ENCODERMASK 0x1FE
 void motor_init();
+int16_t motor_read_encoder();
+void motor_start();
+void motor_stop();
 
 
 #endif
