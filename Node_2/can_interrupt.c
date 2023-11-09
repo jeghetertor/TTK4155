@@ -68,7 +68,9 @@ void CAN0_Handler( void )
 	if(message.id == reset_score_id){
 		goal.current_goal = 0;
 	}
-	
+	if(message.id == difficulty_id){
+		difficulty = message.data[0];
+	}
 	}
 	
 	if(can_sr & CAN_SR_MB0)

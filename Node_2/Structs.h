@@ -1,3 +1,6 @@
+#ifndef STRUCTS_H_
+#define STRUCTS_H_
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -17,3 +20,6 @@ typedef struct Goal{
 	} Goal;
 	
 	Goal goal;
+	
+int8_t difficulty;
+#endif /* STRUCTS_H_ */
