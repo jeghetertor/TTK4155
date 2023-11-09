@@ -29,30 +29,3 @@ void UART_init(long ubrr){
 	UCSR0C = (1<<URSEL0)|(1<<USBS0)|(3<<UCSZ00);
 	fdevopen(UART_transmit, UART_recieve);
 }
-/*
-int main(void)
-{
-	//UCSR0C
-	//UBRRH0
-	UART_init(MYUBRR);
-    Replace with your application code
-    while (1) 
-    {
-		//L = USART_recieve();
-		//USART_Transmit(L);
-		_delay_ms(500);
-		printf("Lab1 er ferdig!\n");
-		//rxVar = USART_recieve();
-		//_delay_ms(10);
-		//L = "b";
-		//USART_Transmit(L);
-		//rxVar = USART_recieve();
-		DDRB = 0xff;
-		PORTB = 0x0;
-		_delay_ms(100);
-		PORTB = 0xff;
-		_delay_ms(100);
-		
-
-    }	
-}*/

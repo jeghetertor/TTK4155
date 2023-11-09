@@ -34,25 +34,11 @@ void mcp_init(){
 		printf(" MCP2515 is NOT in configuration mode after reset !\n");
 	}
 	
-	//ENABLE INTERRUPTS
-	//mcp_interupt_enable();
-	
-	const uint8_t BRP = 4;
-	const uint8_t PS1 = 6;
-	const uint8_t PS2 = 5;
-	const uint8_t PROPAG = 1;
-	const uint8_t SJW = 3;
-	const uint8_t SYNC = 1;
-
-	
 	
 	uint8_t CN1_data = ((1)<<6)|(11<<0);
 	uint8_t CN2_data = (1<<7)|(1<<6)|(3<<3)|(3<<0);
 	int8_t CN3_data = (4<<0);
 	
-	//uint8_t CN1_data = ((SJW) << 6) | ((BRP) << 0);
-	//uint8_t CN2_data = BTLMODE | SAMPLE_3X | ((PS1) << 3) | ((PROPAG) << 0);
-	//uint8_t CN3_data = WAKFIL_DISABLE|(PS2);
 	
 	printf("CN1: %0x\nCN2: %0x\nCN3: %0x\n", CN1_data, CN2_data, CN3_data);
 		

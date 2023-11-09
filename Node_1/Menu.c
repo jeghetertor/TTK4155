@@ -41,7 +41,7 @@ menu_element* add_menu_element(menu_element* parent, char * text, void (* functi
 
 
 void play_game1(){
-	
+	long score = 0;
 	bool game_running = true;
 	oled_reset();
 	oled_pos(3, 0);
@@ -72,11 +72,16 @@ void play_game1(){
 	while(game_running){
 		//struct ADC adc_raw = ADC_read();
 		//printf("x_raw %d y_raw %d\n", adc_raw.x_axis, adc_raw.y_axis);
+		bool exit = PINB & (1 << PINB2);
 		
 		adc = ADC_output(offset_const);
 		CAN_receive(1,&msg);
-		oled_pos(6, 0);
-		oled_print("Goal: %d", msg.data[0]);
+		oled_pos(3, 10);
+		oled_print("Lives: %d", 5-msg.data[0]);
+		oled_pos(1, 10);
+		oled_print("Score: %d", (int) (score/10));
+		oled_pos(7, 2);
+		oled_print("Stop");
 		my_msg.length = 3;
 		my_msg.data[0] = adc.x_axis;
 		my_msg.data[1] = adc.y_axis;
@@ -95,20 +100,21 @@ void play_game1(){
 			CAN_receive(1,&msg);
 			//printf("%d",msg.data[0]);
 		}
-		if(msg.data[0] > 5){
+		if((msg.data[0] > 4)|exit){
 			game_running = false;
 		}
+		score ++;
 		//printf("%d\n", adc.x_axis);
 		//printf("Offset const: %d \n", offset_const.offset_x);
 	}
 	
 	oled_reset();
-	oled_pos(3, 0);
-	oled_print("U");
-	oled_pos(4, 0);
-	oled_print("R");
-	oled_pos(6, 0);
-	oled_print("Luser!");
+	oled_pos(1, 10);
+	oled_print("You lose!");
+	oled_pos(4, 10);
+	oled_print("Final score:");
+	oled_pos(6, 10);
+	oled_print("%dpts.", score);
 	_delay_ms(20000);
 	CAN_transmit(&reset_msg,0);
 }
@@ -123,25 +129,28 @@ void main_menu(){
 		1,
 		't'
 	};
-	
+	CAN_message difficulty_msg = {2,1,0};
 	// INITIATING MENU ELEMENTS
 	menu_element* init_menu = malloc(sizeof(menu_element));
 
-	menu_element* menu_play = add_menu_element(init_menu, "Play game",NULL);
+	menu_element* menu_play = add_menu_element(init_menu, "Play game",play_game1);
 	menu_element* menu_settings = add_menu_element(init_menu, "Settings",NULL);
 	
-	menu_element* menu_setting1 = add_menu_element(menu_settings, "Setting 1",NULL);
+	//menu_element* menu_setting1 = add_menu_element(menu_settings, "Setting 1",NULL);
 	menu_element* menu_setting2 = add_menu_element(menu_settings, "Invert Colors",NULL);
 	
 	menu_element* menu_setting_light = add_menu_element(menu_setting2, "Light Mode", oled_setting_light_mode);
 	menu_element* menu_setting_dark = add_menu_element(menu_setting2, "Dark Mode", oled_setting_dark_mode);
 
-	menu_element* menu_setting3 = add_menu_element(menu_settings, "Setting 3",print_something);
+	//menu_element* menu_setting3 = add_menu_element(menu_settings, "Setting 3",print_something);
 	
-	menu_element* menu_game1 = add_menu_element(menu_play, "Game 1",play_game1);
-	menu_element* menu_game2 = add_menu_element(menu_play, "Game 2",NULL);
+	//menu_element* menu_game1 = add_menu_element(menu_play, "Start game",NULL);
+	menu_element* menu_game_settings = add_menu_element(menu_settings, "Game settings",NULL);
+
+	menu_element* menu_game_settings_difficulty = add_menu_element(menu_game_settings, "Difficulty", NULL);	
 	
-	menu_element* menu_under2 = add_menu_element(menu_game2, "Under 2",NULL);
+	menu_element* empty_element = add_menu_element(menu_game_settings_difficulty, "",NULL);	
+	
 	
 	menu_element* current  = init_menu;
 	
@@ -151,6 +160,8 @@ void main_menu(){
 	unsigned long iteration = DEBOUNCE_CONST;
 	
 	bool oled_inverted_colors = false;
+	int8_t difficulty = 1;
+	bool difficulty_change = false;
 	//struct ADC adc;
 	struct ADC adc;
 	adc = ADC_output(offset_const);
@@ -162,7 +173,7 @@ void main_menu(){
 	
 	while(1){ // game loop
 		struct ADC adc_raw = ADC_read();
-		printf("x_raw %d y_raw %d\n", adc_raw.x_axis, adc_raw.y_axis);
+		//printf("x_raw %d y_raw %d\n", adc_raw.x_axis, adc_raw.y_axis);
 		adc = ADC_output(offset_const);
 		//printf("Joy dir: %d  Xaxis: %d \n", joy_direction, adc.x_axis);
 		
@@ -170,6 +181,7 @@ void main_menu(){
 		iteration == DEBOUNCE_CONST
 		){
 			iteration = 0;
+			difficulty_change = true;
 			oled_reset();
 			joy_direction = Joy_direction(offset_const, adc);
 
@@ -180,9 +192,11 @@ void main_menu(){
 			oled_home(); // reset cursor
 			const uint8_t LINES = 8;
 			
+			
+			
 			for(int i=0; i<LINES; i++){
 				if(current->children[i] != NULL){
-					oled_pos(i,20);
+					oled_pos(i+2,20);
 					oled_print("%s", current->children[i]->text);
 				}
 			}
@@ -197,9 +211,7 @@ void main_menu(){
 					current_line_number = 0;
 					max_menu_elements = current->num_children;
 				}
-				
 				break;
-				
 				// go back
 				case(LEFT): // Left
 				if(current->parent != NULL){
@@ -209,8 +221,36 @@ void main_menu(){
 				}
 			}
 		}
-		
-
+		if(current->text == "Difficulty"){	
+			bool plus = PINB & (1 << PINB1);
+			bool minus = PINB & (1 << PINB2);
+			if((difficulty<5) & (plus)){
+				difficulty++;
+				difficulty_change = true;
+			}
+			if((minus) & (difficulty>1)){
+				difficulty--;
+				difficulty_change = true;
+			}
+			if(difficulty_change == true){
+				oled_reset();
+				oled_pos(3, 0);
+				oled_print("Difficulty: %d", difficulty);
+				
+				oled_pos(7, 2);
+				oled_print("-");
+				
+				oled_pos(7, 120);
+				oled_print("+");
+				_delay_ms(200);
+				difficulty_change = false;
+				difficulty_msg.data[0] = difficulty;
+				CAN_transmit(&difficulty_msg, 0);
+			}
+		}
+		else{
+			difficulty_change = true;
+		}
 		// Used for debounce timer
 		iteration++;
 

@@ -20,14 +20,7 @@
 void CAN_init(){
 	// initier i loopback
 	mcp_bit_modify(MCP_CANCTRL, 0b11100000, MODE_NORMAL);
-	// Usikker
-	//mcp_bit_modify(MCP_CANCTRL, 0b00000100, 0xff); // CLKOUT disabled (?)
-	
-	//TEMP?
-	//mcp_bit_modify(MCP_CANINTE, 0xFF, 0b1);
-	//mcp_bit_modify(MCP_CANINTE, 0xFF, 0b1);
 
-	
 }
 
 void CAN_receive(uint8_t buffer_number, CAN_message* can_message){
@@ -46,7 +39,6 @@ void CAN_receive(uint8_t buffer_number, CAN_message* can_message){
 		}
 		
 		mcp_bit_modify(MCP_CANINTF, MCP_RX0IF, 0);
-		//can_message.data[0] = mcp_read(MCP_RXB0D0);
 		
 		break;
 		case 1  :
@@ -69,8 +61,7 @@ void CAN_receive(uint8_t buffer_number, CAN_message* can_message){
 }
 
 void CAN_transmit(CAN_message *can_message, uint8_t buffer_number){
-	//uint8_t instruction = 0b01000000 | buffer_number;
-	//mcp_write(instruction);
+
 	
 	uint8_t ID_lowerbyte = (can_message->ID&0x7) << 5;
 	
@@ -84,17 +75,7 @@ void CAN_transmit(CAN_message *can_message, uint8_t buffer_number){
 		mcp_write(can_message->data[i],MCP_TXB0D0+i);	
 	}
 	mcp_request_send(0);
-	/*else if (buffer_number == 1){
-		mcp_write(ID_higherbyte, MCP_TXB1SIDH);
-		mcp_write(ID_lowerbyte, MCP_TXB1SIDL);
-		mcp_write(can_message->length, MCP_TXB1DLC);
-		for(uint8_t i = 0; i<can_message->length;i++){
-			mcp_write(can_message->data[i],MCP_TXB1D0+i);
-		}
-		mcp_request_send(1);
-	}*/	
-	//}
-	
+
 }
 void CAN_test(){
 	CAN_message my_msg = {

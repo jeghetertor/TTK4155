@@ -73,29 +73,16 @@ struct Sliders read_slider(void){
 struct ADC  ADC_read(void){
 	volatile char *adc_mem = (char *) 0x1400;
 	adc_mem[0] = 0x04;
-	//_delay_ms(1);
-	//adc_mem[1] = 0x01;
-	//_delay_ms(1);
-	//adc_mem[2] = 0x02;
-	//_delay_ms(1);
-	//adc_mem[3] = 0x03;
-	//_delay_ms(50);
+
 	struct ADC adc;
 	
-	/*uint8_t x_axis = adc_mem[0];
-	uint8_t y_axis = adc_mem[1];
-	uint8_t l_slider = adc_mem[2];
-	uint8_t r_slider = adc_mem[3];*/
+
 	adc.x_axis = adc_mem[0];
 	adc.y_axis = adc_mem[1];
 
 	adc.l_slider = adc_mem[2];
 	adc.r_slider = adc_mem[3];
 	return adc;
-	//printf("0- %02X 1- %02X 2- %02X 3- %02X\n",retreived_value1,retreived_value2,retreived_value3,retreived_value4);
-	//printf("x- %03d y- %03d l_slider- %03d r_slider- %03d\n", x_axis, y_axis, l_slider, r_slider);
-	//printf("v_l %f v_r %f\n",max_voltage, max_dec);
-	
 }
 
 struct ADC ADC_output(struct Offset_const offset_const){

@@ -120,7 +120,7 @@ uint8_t move_arrow(uint8_t current_line_number, Joy_Mode joy_direction, uint8_t 
 			}
 		break;
 	}
-	oled_print_arrow(current_line_number, 2);
+	oled_print_arrow(current_line_number+2, 2);
 	// struct Arrow_state arrow_state;
 	// arrow_state.i = current_line_number;
 	// arrow_state.forward = forward;
